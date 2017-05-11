@@ -1,11 +1,48 @@
-%%
+%{
+This file is one the main files and is based on the Gullstrand-Emsley model.
+ It is divided into several sections for easier manipulation of data. 
+
+In the first section we calculate all the necessary constants and the
+starting E-field. First we create a object which will contain all the
+information about the lenses and can be called from other places to get the
+focal length of the said lens. The total power of the lens can either be
+calculated by using the radius of curvator of the front and the back or by
+using the already know power of those.
+
+Then it is possible to define the sampling distance in the image plane, by
+using the systems total magnification, and generate two vectors with all
+the sample points in both x- and y-direction. From this information we can
+create the incident E-field by using the formula, e^(j*k*r)/r.
+
+In the second section we calculate the field after propagation with the
+beam propagation method and the propagation of angular spectrum method. See
+the Angular_propagation.m and the BPM_Gullstrand_Emsley.m files for further 
+information about those methods. 
+
+In the third section we plot the intensitety distribution along
+the direction of propagation by taking the y-values from the intensity
+matrix and plotting it against the distance the field has propagated.
+
+In the fourth section we calculate the PSF, which is just "abs(E)^2", and
+the image by taking the convultion of the object matrix and the PSF. The
+image in the image plane, on the retina, can be compared with the image in
+the object plane by plotting them both which is also done in this section.
+
+In the fifth section we plot the intensity, the magnitude and
+the phase shift of the field in the image plane, on the retina.
+
+In the last section we calculate different errors by using the Image
+processing tool provided by MATLAB.
+
+%}
+%% Calculate necessary constants and starting field
 close all
 clc
 
 global N
 load Intensity_matrix
 
-N=2048;     % Matrix size
+N=2048;     % Matrix size of the object
 delta_object=100e-2/N; % Sampling distance in the object plane
 
 L=5;    % Propagation length in meters
@@ -24,8 +61,9 @@ Lens(2) = Lenses(7.82, 13.3, 1.336, 1.422, 3.7e-3);
 Lens(1).focal = 1/get_power(Lens(1));
 Lens(2).focal = 1/get_power(Lens(2));
 
-p(1)=-5; p(2)=3.6e-3;
-for i=1:2
+% Calculates the total magnification of the lens system
+p(1)=-L; p(2)=3.6e-3;
+for i=1:length(p)
     if i==1
         p(i)=p(i);
     else
@@ -35,54 +73,59 @@ for i=1:2
     m(i)=(-1).*q(i)/p(i);
 end
 
-M=-1*prod(m);
+M=-1*prod(m); % Total magnification
 
-delta_image=M.*delta_object;
+delta_image=M.*delta_object; % Sampling distance in the image plane
 
+% Declaration of vectors in the image plane
 x_vector=-N/2*delta_image:delta_image:(N/2-1)*delta_image;
 y_vector=x_vector;
 [x_matrix,y_matrix]=meshgrid(x_vector,y_vector); 
 r_matrix=sqrt(x_matrix.^2+y_matrix.^2);
 
-% Wave number
+% Wavenumber
 k0=2*pi*refractive_index_air/wavelength;
 r_k=sqrt(L^2-(x_matrix).^2-(y_matrix).^2);
-E_in=exp(1i*k0*r_k)./r_k;
-f_cyl=1/0.75;
 
 % Constants for the lenses/parts of the eye
-Pupill_diameter=4e-3;
-T_apertur=r_matrix<(Pupill_diameter/2);
+pupil_diameter=4e-3;
+TF_pupil=r_matrix<(pupil_diameter/2);
 k(1)=(2*pi*1.3771)/(632.8e-9/1.3771);
 k(2)=2*pi*1.42/(632.8e-9/1.42);
+
+% Gets the transmission functions for all the lenses
 for i=1:length(Lens)
     Lens(i).TF=get_TF(k(i),r_matrix,Lens(i));
 end
 
-% Calculation of the electrical field
-f_korrektion =-0.47; % a positive value means farsightedness
-% Focal length help
-T_lins_korrektion=exp(-1i*k0*r_matrix.^2/(2*f_korrektion));
+% Calculates the incident E-field
+E_in=exp(1i*k0*r_k)./r_k;
 L=24e-3;
 delta_z=0.1e-3;
-Lvekt=0:delta_z:L;
+L_vector=0:delta_z:L;
+
+%% Calculation of the electrical field with BPM
+
 E1=E_in;
-I_norm=zeros(N,length(Lvekt));
-steg_nummer=0;
-for akt_L=Lvekt
-    steg_nummer=steg_nummer+1;
+I_norm=zeros(N,length(L_vector));
+step_number=0;
+
+% Calculates the E-field with BPM
+for current_L=L_vector
+    step_number=step_number+1;
     
-    E2=BPM_Gullstrand_Emsley(E1,delta_z,delta_image,wavelength, akt_L, Lens, T_apertur);
+    E2=BPM_Gullstrand_Emsley(E1,delta_z,delta_image,wavelength, current_L, Lens, TF_pupil);
     
     I2=abs(E2).^2; 
     
     E2_y=E2(:,N/2+1);
     I2_y=abs(E2_y).^2;
     I2_y_norm=I2_y/max(I2_y);
-    I_norm(:,steg_nummer)=I2_y_norm;
+    I_norm(:,step_number)=I2_y_norm;
         
     E1=E2;
 end
+
 %%
 figure(11)
 imagesc(Lvekt*1e3,y_vector*1e3,I_norm/max(max(I_norm))*64)

@@ -23,7 +23,7 @@ E2 = the resulting E-field after the cornea, the lens and at the retina.
 
 function [E2]=BPM_Emsley(E1,delta_z,delta_image,wavelength, length_position, Lens, TF_pupil, T_astigatism)
 if length_position == 0
-    E2 = Lens(1).TF.*E1;
+    E2 = Lens(1).TF.*E1; %.*T_astigatism;
 
 elseif length_position > 0 && length_position<0.55e-3
 

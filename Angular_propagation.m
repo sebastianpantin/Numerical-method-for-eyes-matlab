@@ -59,4 +59,3 @@ Angular_spectrum=delta_image^2/(2*pi)^2*fft2c(E1);
 Angular_spectrum_plane_2=Angular_spectrum.*phase_propagation;
 
 E2=delta_k^2*N^2*ifft2c(Angular_spectrum_plane_2);
-
