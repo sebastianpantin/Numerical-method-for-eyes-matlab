@@ -39,16 +39,14 @@ processing tool provided by MATLAB.
 close all
 clc
 
-global N
+global matrix_size
 load Intensity_matrix
-
-
-N=2048;     % Matrix size of the object
-delta_object=100e-2/N; % Sampling distance in the object plane
 
 L=5;    % Propagation length in meters
 wavelength=550e-9;
 refractive_index_air=1.0003;
+matrix_size=2048;     % Matrix size of the object
+delta_object=100e-2/matrix_size; % Sampling distance in the object plane
 
 % Different method, uses radius of curvature.
 %Lens(1) = Lenses(7.259e-3, -5.585e-3, 1, 1.376, 0);
@@ -79,14 +77,14 @@ M=-1*prod(m); % Total magnification
 delta_image=M.*delta_object; % Sampling distance in the image plane
 
 % Declaration of vectors in the image plane
-x_vector=-N/2*delta_image:delta_image:(N/2-1)*delta_image;
+x_vector=-matrix_size/2*delta_image:delta_image:(matrix_size/2-1)*delta_image;
 y_vector=x_vector;
 [x_matrix,y_matrix]=meshgrid(x_vector,y_vector); 
 r_matrix=sqrt(x_matrix.^2+y_matrix.^2);
 
 % Wavenumber
 k0=2*pi*refractive_index_air/wavelength;
-r_k=sqrt(L^2-(x_matrix).^2-(y_matrix).^2);
+r_k_plane=sqrt(L^2-(x_matrix).^2-(y_matrix).^2);
 
 % Constants for the lenses/parts of the eye
 Pupil_diameter=4e-3;
@@ -101,7 +99,7 @@ for i=1:length(Lens)
 end
 
 % Calculates the incident E-field
-E_in=exp(1i*k0*r_k)./r_k;
+E_in=exp(1i*k0*r_k_plane)./r_k_plane;
 L=24e-3;
 delta_z=0.1e-3;
 L_vector=0:delta_z:L;
@@ -109,21 +107,18 @@ L_vector=0:delta_z:L;
 %% Calculation of the electrical field with BPM
 
 E1=E_in;
-I_norm=zeros(N,length(L_vector));
+I_norm=zeros(matrix_size,length(L_vector));
 step_number=0;
 
 % Calculates the E-field with BPM
 for current_L=L_vector
     step_number=step_number+1;
     
-    E2=BPM_Emsley(E1,delta_z,delta_image,wavelength, current_L, Lens, TF_pupil, T_astigmatism);
-    
-    I2=abs(E2).^2; 
-    
-    E2_y=E2(:,N/2+1);
-    I2_y=abs(E2_y).^2;
-    I2_y_norm=I2_y/max(I2_y);
-    I_norm(:,step_number)=I2_y_norm;
+    E2=BPM_Emsley(E1,delta_z,delta_image,wavelength, current_L, Lens, TF_pupil, T_astigmatism); 
+    E_y=E2(:,matrix_size/2+1);
+    I_y=abs(E_y).^2;
+    I_y_norm=I_y/max(I_y);
+    I_norm(:,step_number)=I_y_norm;
         
     E1=E2;
 end
@@ -155,7 +150,7 @@ colormap(gray)
 
 %% plot intensity, phase and mag
 figure(1)
-plot(x_vector,PSF(N/2+1,:)/max(PSF(N/2+1,:)));
+plot(x_vector,PSF(matrix_size/2+1,:)/max(PSF(matrix_size/2+1,:)));
 axis([-1e-3 1e-3 0 1])
 set(gca,'FontSize',14)
 yticks([0 0.5 1])
@@ -165,13 +160,13 @@ title(['Intensity distribution in the image plane']);
 
 figure(2)
 %plot obs field mag
-plot(x_vector,abs(E2(N/2+1,:)));
+plot(x_vector,abs(E2(matrix_size/2+1,:)));
 xlabel('x (m)'); ylabel('Magnitude');
 title(['Magnitude in the image plane']);
 
 figure(3)
 %plot obs field phase
-plot(x_vector,unwrap(angle(E2(N/2+1,:))));
+plot(x_vector,unwrap(angle(E2(matrix_size/2+1,:))));
 xlabel('x (m)'); ylabel('Fas (rad)');
 title(['E-field phase distribution in the image plane']);
 

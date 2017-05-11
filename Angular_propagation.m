@@ -17,7 +17,7 @@ E2 = The resulting electromagnetic field after propagation of the first
 fields angular spectrum.
 
 ----------------Declared variables---------
-N = size of matrix, global variable,
+matrix_size = size of matrix, global variable,
 delta_k = sampling distance in the k plane at distance L,
 k_x = A vector with all the sample positions in axial direction of kx,
 k_y = Is equal to k_x to make the plane into a square form and so all
@@ -43,11 +43,11 @@ it as a complex matrix.
 %}
 
 function E2=Angular_propagation(E1,L,delta_image,wavelength,refractive_index)
-global N
+global matrix_size
 % Calculate sampling distance in k-plane, the same way as in the main
 % files, also generates k-vector and the k-matrix.
-delta_k=2*pi/(N*delta_image); 
-k_x=-N/2*delta_k:delta_k:(N/2-1)*delta_k;
+delta_k=2*pi/(matrix_size*delta_image); 
+k_x=-matrix_size/2*delta_k:delta_k:(matrix_size/2-1)*delta_k;
 k_y=k_x;
 [kx_matrix,ky_matrix]=meshgrid(k_x,k_y); 
 length_k=2*pi/(wavelength/refractive_index); 
@@ -60,4 +60,4 @@ Angular_spectrum_plane_1=delta_image^2/(2*pi)^2*fft2c(E1);
 Angular_spectrum_plane_2=Angular_spectrum_plane_1.*phase_propagation;
 
 % Calculate the electric field by propagating the angular spectrum.
-E2=delta_k^2*N^2*ifft2c(Angular_spectrum_plane_2);
+E2=delta_k^2*matrix_size^2*ifft2c(Angular_spectrum_plane_2);
