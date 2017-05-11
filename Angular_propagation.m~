@@ -59,5 +59,5 @@ phase_propagation=exp(1i*kz_matrix*L);
 Angular_spectrum_plane_1=delta_image^2/(2*pi)^2*fft2c(E1); 
 Angular_spectrum_plane_2=Angular_spectrum_plane_1.*phase_propagation;
 
-% Calculate the electric field by propagating the angular spectrum.
+% Calculate the electric field by propagating th
 E2=delta_k^2*N^2*ifft2c(Angular_spectrum_plane_2);
