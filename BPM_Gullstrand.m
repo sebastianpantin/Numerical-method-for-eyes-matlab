@@ -1,4 +1,4 @@
-%{
+ %{
 BPM is a function based on the beam propagation method which calculates the
 electromagnetic field for small changes in positition with the help of
 angular spectrum propagation in the eye. For the first part we multiply the

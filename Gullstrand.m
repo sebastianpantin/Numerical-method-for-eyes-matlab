@@ -145,7 +145,7 @@ colormap('jet');
 %% Calculate the PSF and plot the snellen chart in the image plane and the object plane
 
 PSF=abs(E2).^2;
-Image=ifft2c(fft2c(B).*fft2c(PSF));
+Image=shifted_IFFT2(shifted_FFT2(B).*shifted_FFT2(PSF));
 
 figure('Name','Plane 2, Retina','NumberTitle','off')
 image(x_vector*1e3*delta_image,y_vector*1e3*delta_image,Image/max(max(Image))*64)

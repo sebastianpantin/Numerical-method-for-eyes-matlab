@@ -100,7 +100,7 @@ end
 
 % Calculates the incident E-field
 E_in=exp(1i*k0*r_k_plane)./r_k_plane;
-L=24e-3;
+L=26e-3;
 delta_z=0.1e-3;
 L_vector=0:delta_z:L;
 
@@ -125,11 +125,11 @@ end
 %% Plots the intensitety distribution along the propagation direction
 figure(11)
 imagesc(L_vector*1e3,y_vector*1e3,I_norm/max(max(I_norm))*64)
-title('       Intensity distribution along the propagation', 'Fontsize',12)
+title('       Intensitetsfördelning längs propagationen', 'Fontsize',12)
 set(gca,'FontSize',12)
-%line([24,24], [1.67,-1.67], 'Color', 'white')
-%txt1 = 'Retina \rightarrow';
-%text(16,-1,txt1,'Color','white','FontSize', 15)
+line([24,24], [1.67,-1.67], 'Color', 'white')
+txt1 = 'Näthinna \rightarrow';
+text(16,-1,txt1,'Color','white','FontSize', 15)
 yticks([-2 -1 0 1 2])
 xticks([0 6 12 18 24])
 xlabel('z [mm]')

@@ -124,7 +124,7 @@ end
 
 %%
 figure(11)
-imagesc(Lvekt*1e3,y_vector*1e3,I_norm/max(max(I_norm))*64)
+imagesc(L_vector*1e3,y_vector*1e3,I_norm/max(max(I_norm))*64)
 title('       Intensity distribution along the propagation direction', 'Fontsize',14)
 set(gca,'FontSize',14)
 yticks([-2 -1 0 1 2])
@@ -137,7 +137,7 @@ colormap('jet');
 
 %%
 PSF=abs(E2).^2;
-Image=ifft2c(fft2c(B).*fft2c(PSF));
+Image=shifted_IFFT2(shifted_FFT2(B).*shifted_FFT2(PSF));
 
 figure('Name','Plane 2, Retina','NumberTitle','off')
 %image(xvekt*1e3*delta_b,yvekt*1e3*delta_b,PSF/max(max(PSF))*64)

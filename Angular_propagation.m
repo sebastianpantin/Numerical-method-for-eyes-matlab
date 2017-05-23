@@ -56,8 +56,8 @@ kz_matrix=sqrt(length_k^2-kx_matrix.^2-ky_matrix.^2);
 % Calculate the phase and the angular spectrum before and after propagation
 % of length L.
 phase_propagation=exp(1i*kz_matrix*L); 
-Angular_spectrum_plane_1=delta_image^2/(2*pi)^2*fft2c(E1); 
+Angular_spectrum_plane_1=delta_image^2/(2*pi)^2*shifted_FFT2(E1); 
 Angular_spectrum_plane_2=Angular_spectrum_plane_1.*phase_propagation;
 
 % Calculate the electric field by propagating the angular spectrum.
-E2=delta_k^2*matrix_size^2*ifft2c(Angular_spectrum_plane_2);
+E2=delta_k^2*matrix_size^2*shifted_IFFT2(Angular_spectrum_plane_2);
